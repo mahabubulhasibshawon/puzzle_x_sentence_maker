@@ -10,8 +10,18 @@ class SentenceMaker extends StatefulWidget {
 class _SentenceMakerState extends State<SentenceMaker> {
   List<String> row1 = [];
   List<String?> row2 = ['go', 'I', 'now', 'should'];
-  final Map<String, int> row2Indices = {'go': 0, 'I': 1, 'now': 2, 'should': 3};
-  bool showResult = false;
+
+  final Map<String, int> row2Indices = {
+    'go': 0,
+    'I': 1,
+    'now': 2,
+    'should': 3,
+  };
+
+  final List<String> correctSentence = ['I', 'should', 'go', 'now'];
+
+  bool isChecked = false;
+  bool isCorrect = false;
 
   void moveWord(String word, int index, bool toRow1) {
     setState(() {
@@ -28,6 +38,13 @@ class _SentenceMakerState extends State<SentenceMaker> {
     });
   }
 
+  void checkSentence() {
+    setState(() {
+      isChecked = true;
+      isCorrect = row1.join(' ') == correctSentence.join(' ');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
@@ -35,121 +52,103 @@ class _SentenceMakerState extends State<SentenceMaker> {
 
     return Scaffold(
       backgroundColor: Colors.black87,
-      body: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(height * .01),
-            child: Column(
+      body: Padding(
+        padding: EdgeInsets.all(height * .01),
+        child: Column(
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Icon(Icons.keyboard_backspace, color: Colors.white),
+                Text('১/৪৭', style: TextStyle(color: Colors.white)),
+                Row(
                   children: [
-                    Icon(Icons.keyboard_backspace, color: Colors.white),
-                    Text('১/৪৭', style: TextStyle(color: Colors.white)),
-                    Row(
-                      children: [
-                        Icon(Icons.diamond, color: Colors.white),
-                        Text('৫', style: TextStyle(color: Colors.white)),
-                      ],
-                    ),
+                    Icon(Icons.diamond, color: Colors.white),
+                    Text('৫', style: TextStyle(color: Colors.white))
                   ],
                 ),
-                SizedBox(height: height * .1),
+              ],
+            ),
+            SizedBox(height: height * .1),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 Text('সঠিক ইংরেজি শব্দ দিয়ে অনুবাদ করুন',
                     style: TextStyle(
                         fontSize: height * .02,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                SizedBox(height: height * .05),
-                Text('আমার এখন যাওয়া উচিৎ',
-                    style: TextStyle(
-                        fontSize: height * .03,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                SizedBox(height: height * .2),
-                SizedBox(
-                  height: height * 0.1,
-                  child: Row(
-                    children: row1
-                        .asMap()
-                        .map((index, word) => MapEntry(
-                      index,
-                      GestureDetector(
+                        color: Colors.white))
+              ],
+            ),
+            SizedBox(height: height * .05),
+            Text('আমার এখন যাওয়া উচিৎ',
+                style: TextStyle(
+                    fontSize: height * .03,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            SizedBox(height: height * .15),
+
+            // Top Row
+            SizedBox(
+              height: height * 0.1,
+              child: Row(
+                children: row1
+                    .asMap()
+                    .map((index, word) {
+                  return MapEntry(
+                    index,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.linear,
+                      child: GestureDetector(
                         onTap: () => moveWord(word, -1, false),
                         child: _wordContainer(height, width, word),
                       ),
-                    ))
-                        .values
-                        .toList(),
-                  ),
-                ),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    row2.length,
-                        (index) => row2[index] != null
-                        ? GestureDetector(
-                        onTap: () => moveWord(row2[index]!, index, true),
-                        child: _wordContainer(height, width, row2[index]!))
-                        : _emptyContainer(height, width, ''),
-                  ),
-                ),
-                SizedBox(height: height * .3),
-                GestureDetector(
-                  onTap: () {
-                    if (row1.length == 4) {
-                      setState(() {
-                        showResult = true;
-                      });
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 500),
-                    height: height * .05,
-                    width: width * .7,
-                    decoration: BoxDecoration(
-                      color: row1.length == 4 ? Colors.white : Colors.black,
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(
-                      child: Text(
-                        row1.length == 4 ? 'চেক করুন' : 'পরবর্তী',
-                        style: TextStyle(
-                          fontSize: height * 0.02,
-                          fontWeight: FontWeight.bold,
-                          color: row1.length == 4 ? Colors.black : Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  );
+                })
+                    .values
+                    .toList(),
+              ),
             ),
-          ),
-          if (showResult)
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 500),
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: height / 3,
-              child: AnimatedContainer(
-                curve: Curves.linearToEaseOut,
-                margin: EdgeInsets.all(20),
-                duration: Duration(milliseconds: 500),
-                decoration: BoxDecoration(
-                  color: Color(0xFF27312f),
-                  borderRadius: BorderRadius.circular(10)
-                ),
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                    ),
-                    child: Column(
+            const Divider(),
+
+            // Bottom Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                row2.length,
+                    (index) => row2[index] != null
+                    ? GestureDetector(
+                  onTap: () => moveWord(row2[index]!, index, true),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                    child: _wordContainer(height, width, row2[index]!),
+                  ),
+                )
+                    : _emptyContainer(height, width * 0.7, ''),
+              ),
+            ),
+            Spacer(),
+            // Button and Animated Feedback Container
+            Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                // Animated Feedback Container
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  height: isChecked ? isCorrect? 300 : 397 : 0,
+                  width: width,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF27312f),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: isCorrect ? Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -168,34 +167,89 @@ class _SentenceMakerState extends State<SentenceMaker> {
                             ],
                           ),
                         ),
-                        Spacer(),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 500),
-                          height: height * .05,
-                          width: width * .7,
-                          decoration: BoxDecoration(
-                            color: row1.length == 4 ? Colors.white : Colors.black,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'পরবর্তী',
-                              style: TextStyle(
-                                fontSize: height * 0.02,
-                                fontWeight: FontWeight.bold,
-                                color: row1.length == 4 ? Colors.black : Colors.white,
+                      ],
+                    ) : Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'সঠিক হয়নি',
+                                style: TextStyle(
+                                    fontSize: height * .03, fontWeight: FontWeight.bold, color: Color(0xFFb4413d)),
                               ),
-                            ),
+                              Image.network('https://media.tenor.com/8QPpKnJQiS4AAAAj/spongebob-flip.gif', height: height * .15,)
+                            ],
                           ),
                         ),
-                        SizedBox(height: 10),
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          margin: EdgeInsets.all(10),
+                          height: 150,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF404947),
+                            borderRadius: BorderRadius.circular(10)
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF65c748),
+                                        borderRadius: BorderRadius.circular(4)
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Center(child: Text('সমাধান',style: TextStyle(fontWeight: FontWeight.bold),)),
+                                      ),
+                                    ),
+                                    Spacer()
+                                  ],
+                                ),
+                                Spacer(),
+                                Text('I should go now', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xff9aa3a1)),),
+                                Text('ব্যাখ্যা', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color:  Color(
+                                    0xffd9dedc))),
+                                Spacer(),
+                                Text('I অর্থ আমি/আমার should অর্থ উচিৎ go অর্থ \nযাওয়া Now অর্থ এখন', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color:  Color(0xff9aa3a1)),),
+                              ],
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ),
                 ),
-              ),
+                // Check/Next Button (Position remains fixed)
+                Container(
+                  height: height * .05,
+                  width: width * .7,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextButton(
+                    onPressed: checkSentence,
+                    child: Text(
+                      isChecked ? 'পরবর্তী' : 'চেক করুন',
+                      style: TextStyle(
+                        fontSize: height * 0.02,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
